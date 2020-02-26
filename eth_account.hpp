@@ -53,7 +53,7 @@ bool    eth_account_exists(eth_address& address);
 void    eth_account_check_address(eth_address& address);
 uint64_t eth_account_find_creator_by_address(eth_address& address);
 
-uint64_t eth_account_get_info(eth_address& address, uint64_t* creator, int32_t* nonce, int64_t* amount);
+uint64_t eth_account_get_info(eth_address& address, uint64_t* creator, int64_t* nonce, int64_t* amount);
 
 int64_t  eth_account_get_balance(eth_address& address);
 bool    eth_account_set_balance(eth_address& address, int64_t amount);
@@ -62,8 +62,8 @@ bool    eth_account_get_code(eth_address& address, std::vector<unsigned char>& e
 bool    eth_account_set_code(eth_address& address, const std::vector<unsigned char>& evm_code);
 uint32_t  eth_account_get_code_size(eth_address& address);
 bool    eth_account_clear_code(eth_address& address);
-bool    eth_account_get_nonce(eth_address& address, uint32_t& nonce);
-bool    eth_account_set_nonce(eth_address& address, uint32_t nonce);
+bool    eth_account_get_nonce(eth_address& address, uint64_t& nonce);
+bool    eth_account_set_nonce(eth_address& address, uint64_t nonce);
 
 bool    eth_account_get_value(eth_address& address, key256& key, value256& value);
 bool    eth_account_set_value(eth_address& address, key256& key, value256& value);

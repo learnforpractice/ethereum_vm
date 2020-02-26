@@ -22,7 +22,7 @@ using namespace eosio;
 struct [[eosio::table]] ethaccount {
     uint64_t                        index;
     uint64_t                        creator;
-    int32_t                         nonce;
+    int64_t                         nonce;
     std::vector<char>               address;
     asset                           balance;
     ethaccount() {
@@ -349,7 +349,7 @@ void eth_account_check_address(eth_address& address) {
     check(idx != idx_sec.end(), "eth address does not exists!");
 }
 
-uint64_t eth_account_get_info(eth_address& address, uint64_t* creator, int32_t* nonce, int64_t* amount) {
+uint64_t eth_account_get_info(eth_address& address, uint64_t* creator, int64_t* nonce, int64_t* amount) {
     uint64_t code = current_receiver().value;
     uint64_t scope = code;
 
@@ -558,7 +558,7 @@ bool eth_account_clear_code(eth_address& address) {
     return true;
 }
 
-bool eth_account_get_nonce(eth_address& address, uint32_t& nonce) {
+bool eth_account_get_nonce(eth_address& address, uint64_t& nonce) {
     ethaccount account;
     if (!eth_account_get(address, account)) {
         return false;
@@ -567,7 +567,7 @@ bool eth_account_get_nonce(eth_address& address, uint32_t& nonce) {
     return true;
 }
 
-bool eth_account_set_nonce(eth_address& address, uint32_t nonce) {
+bool eth_account_set_nonce(eth_address& address, uint64_t nonce) {
     ethaccount account;
     if (!eth_account_get(address, account)) {
         return 0;
