@@ -152,15 +152,15 @@ extern "C" {
                 eth_account_bind_address_to_creator(address, v.account.value);
                 bool ret = eth_account_create(address, v.account.value);
             } else if (action == "raw"_n.value) {
-                uint64_t creator;
                 auto a = unpack_action_data<raw>();
-                eth_address address;
-                check(a.sender.size() == 20, "bad eth address");
-                memcpy(address.data(), a.sender.data(), 20);
 
-                creator = eth_account_find_creator_by_address(address);
-                check(creator, "address not bind to an EOS account!");
-                require_auth(name(creator));
+//                uint64_t creator;
+//                eth_address address;
+//                check(a.sender.size() == 20, "bad eth address");
+//                memcpy(address.data(), a.sender.data(), a.sender.size());
+//                creator = eth_account_find_creator_by_address(address);
+//                check(creator, "address not bind to an EOS account!");
+//                require_auth(name(creator));
 
                 evm_execute(a.trx.data(), a.trx.size(), a.sender.data(), a.sender.size());
             } else if (action == "getaddrinfo"_n.value) {
