@@ -165,7 +165,7 @@ extern "C" {
                 evm_execute(a.trx.data(), a.trx.size(), a.sender.data(), a.sender.size());
             } else if (action == "getaddrinfo"_n.value) {
                 eth_address address;
-                int32_t nonce;
+                int64_t nonce;
                 int64_t ram_quota;
                 int64_t amount;
                 
