@@ -21,7 +21,7 @@ struct [[eosio::table]] evm_storage {
 };
 
 struct [[eosio::table]] address_info {
-    vector<uint8_t>         address;
+    eth_address             address;
     uint64_t                nonce;
     std::array<uint8_t, 32> balance;
     vector<uint8_t>        code;
@@ -39,21 +39,36 @@ struct [[eosio::table]] testenv {
     EOSLIB_SERIALIZE( testenv, (current_coinbase)(current_difficulty)(current_gas_limit)(current_number)(current_timestamp) )
 };
 
+struct testexec {
+    // "address" : "0x0f572e5295c57f15886f9b263e2f6d2d6c7b5ec6",
+    // "caller" : "0xcd1722f3947def4cf144679da39c4c32bdc35681",
+    // "code" : "0x7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7feeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee16600055",
+    // "data" : "0x",
+    // "gas" : "0x0186a0",
+    // "gasPrice" : "0x5af3107a4000",
+    // "origin" : "0xcd1722f3947def4cf144679da39c4c32bdc35681",
+    // "value" : "0x0de0b6b3a7640000"
+    eth_address address;
+    eth_address caller;
+    vector<uint8_t> code;
+    vector<uint8_t> data;
+    uint64_t gas;
+    uint64_t gas_price;
+    eth_address origin;
+    std::array<uint8_t, 32> value;
+    EOSLIB_SERIALIZE( testexec, (address)(caller)(code)(data)(gas)(gas_price)(origin)(value) )
+};
 
 struct [[eosio::table]] ethaccount {
     uint64_t                        index;
     uint64_t                        creator;
     int64_t                         nonce;
-    std::vector<char>               address;
+    eth_address                     address;
     std::array<uint8_t, 32>         balance;
-    ethaccount() {
-        address.resize(SIZE_ADDRESS);
-    }
     uint64_t primary_key() const { return index; }
 
     checksum256 by_address() const {
-       auto ret = checksum256();//address;
-       memset(ret.data(), 0, sizeof(checksum256));
+       auto ret = checksum256();
        memcpy(ret.data(), address.data(), SIZE_ADDRESS);
        return ret;
     }
@@ -89,18 +104,13 @@ struct [[eosio::table]] account_state {
 
 struct [[eosio::table]] ethcode {
     uint64_t                        index;
-    std::vector<char>               address;
+    eth_address                     address;
     vector<char>                    code;
     uint64_t                        version;
     uint64_t primary_key() const { return index; }
 
-    ethcode() {
-        address.resize(SIZE_ADDRESS);
-    }
-
     checksum256 by_address() const {
        auto ret = checksum256();
-       memset(ret.data(), 0, sizeof(checksum256));
        memcpy(ret.data(), address.data(), SIZE_ADDRESS);
        return ret;
     }
@@ -129,15 +139,11 @@ struct [[eosio::table]] key256counter {
 };
 
 struct [[eosio::table]] addressmap {
-    uint64_t                        creator;
-    std::vector<char>               address;
+    uint64_t            creator;
+    eth_address         address;
     uint64_t primary_key() const { return creator; }
-    addressmap() {
-        address.resize(20);
-    }
     checksum256 by_address() const {
        auto ret = checksum256();
-       memset(ret.data(), 0, sizeof(checksum256));
        memcpy(ret.data(), address.data(), SIZE_ADDRESS);
        return ret;
     }

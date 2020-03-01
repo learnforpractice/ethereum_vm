@@ -68,8 +68,7 @@ bool eth_account_bind_address_to_creator(eth_address& address, uint64_t creator)
 
     table.emplace( payer, [&]( auto& row ) {
         row.creator = creator;
-        row.address.resize(SIZE_ADDRESS);
-        memcpy(row.address.data(), address.data(), SIZE_ADDRESS);
+        row.address = address;
     });
     return true;
 }
@@ -82,7 +81,7 @@ bool eth_account_find_address_by_binded_creator(uint64_t creator, eth_address& a
     addressmap_table table(name(code), scope);
     auto itr = table.find(creator);
     check (table.end() != itr, "creator does not bind to an eth address");
-    memcpy(address.data(), itr->address.data(), SIZE_ADDRESS);
+    address = itr->address;
     return true;
 }
 
@@ -162,9 +161,7 @@ bool eth_account_create(eth_address& address, uint64_t creator) {
         // eosio::print("address not found!\n");
         mytable.emplace( name(payer), [&]( auto& row ) {
             row.balance = {};
-
-            row.address.resize(SIZE_ADDRESS);
-            memcpy(row.address.data(), address.data(), SIZE_ADDRESS);
+            row.address = address;
             row.index = index;
             row.creator = creator;
             row.nonce = 1;
@@ -361,8 +358,7 @@ bool eth_account_set_code(eth_address& address, const std::vector<unsigned char>
     if (itr == mytable.end()) {
         mytable.emplace( name(creator), [&]( auto& row ) {
             row.index = address_index;
-            row.address.resize(SIZE_ADDRESS);
-            memcpy(row.address.data(), address.data(), SIZE_ADDRESS);
+            row.address = address;
             row.code.resize(evm_code.size());
             memcpy(row.code.data(), evm_code.data(), evm_code.size());
         });

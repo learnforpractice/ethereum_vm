@@ -81,7 +81,7 @@ struct raw {
 
 struct bind_address {
     name         account;
-    vector<char> address;
+    eth_address  address;
     EOSLIB_SERIALIZE( bind_address, (account)(address) )
 };
 
@@ -141,14 +141,12 @@ extern "C" {
                 eth_account_clear_all();
             } else if (action == "setaddrinfo"_n.value) {
                 auto info = unpack_action_data<address_info>();
-                eosio::check(info.address.size() == 20, "bad address size!!");
-                eth_address &addr = *(eth_address*)info.address.data();
-                eth_account_create(addr, code);
-                eth_account_set_nonce(addr, info.nonce);
+                eth_account_create(info.address, code);
+                eth_account_set_nonce(info.address, info.nonce);
                 // printhex(info.balance.data(), info.balance.size());print("\n");
                 eosio::check(info.balance.size()==32, "bad balance value");
-                eth_account_set_balance(addr, *(eth_uint256*)info.balance.data());
-                eth_account_set_code(addr, info.code);
+                eth_account_set_balance(info.address, *(eth_uint256*)info.balance.data());
+                eth_account_set_code(info.address, info.code);
         // vector<uint8_t>         address;
         // uint64_t                nonce;
         // uint64_t                balance;
@@ -164,10 +162,8 @@ extern "C" {
             } else if (action == "bind"_n.value) {
                 eth_address address;
                 auto v = unpack_action_data<bind_address>();
-                check(v.address.size() == 20, "bad address");
-                memcpy(address.data(), v.address.data(), 20);
-                eth_account_bind_address_to_creator(address, v.account.value);
-                bool ret = eth_account_create(address, v.account.value);
+                eth_account_bind_address_to_creator(v.address, v.account.value);
+                bool ret = eth_account_create(v.address, v.account.value);
             } else if (action == "raw"_n.value) {
                 auto a = unpack_action_data<raw>();
 

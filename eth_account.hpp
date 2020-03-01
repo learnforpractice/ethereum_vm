@@ -13,14 +13,14 @@ static constexpr int64_t max_amount = (1LL << 62) - 1;
 typedef unsigned __int128 uint128_t;
 typedef __int128 int128_t;
 
-// typedef std::array<unsigned char, 20> eth_address;
+typedef std::array<unsigned char, 20> eth_address;
 
-typedef struct eth_address
-{
-    uint8_t bytes[20];
-    uint8_t* data() {return bytes;};
-    uint32_t size() {return 20;}
-} eth_address;
+// typedef struct eth_address
+// {
+//     uint8_t bytes[20];
+//     uint8_t* data() {return bytes;};
+//     uint32_t size() {return 20;}
+// } eth_address;
 
 typedef struct eth_uint256
 {
