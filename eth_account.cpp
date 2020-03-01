@@ -161,8 +161,8 @@ bool eth_account_create(eth_address& address, uint64_t creator) {
         uint64_t index = get_next_eth_address_index(creator);
         // eosio::print("address not found!\n");
         mytable.emplace( name(payer), [&]( auto& row ) {
-            asset a(0, symbol(ETH_ASSET_SYMBOL, 4));
-            row.balance = a;
+            row.balance = {};
+
             row.address.resize(SIZE_ADDRESS);
             memcpy(row.address.data(), address.data(), SIZE_ADDRESS);
             row.index = index;
@@ -171,7 +171,7 @@ bool eth_account_create(eth_address& address, uint64_t creator) {
         });
         return true;
     } else {
-        eosio::check(false, "eth address already exists!");
+        eosio::check(false, "eth address already exists!!!");
     }
     return false;
 }
@@ -211,7 +211,7 @@ void eth_account_check_address(eth_address& address) {
     check(idx != idx_sec.end(), "eth address does not exists!");
 }
 
-uint64_t eth_account_get_info(eth_address& address, uint64_t* creator, int64_t* nonce, int64_t* amount) {
+uint64_t eth_account_get_info(eth_address& address, uint64_t* creator, int64_t* nonce, eth_uint256* amount) {
     uint64_t code = current_receiver().value;
     uint64_t scope = code;
 
@@ -230,7 +230,7 @@ uint64_t eth_account_get_info(eth_address& address, uint64_t* creator, int64_t* 
         *nonce = idx->nonce;
     }
     if (amount) {
-        *amount = idx->balance.amount;
+        memcpy(amount->bytes, idx->balance.data(), 32);
     }
     if (creator) {
         *creator = idx->creator;
@@ -283,7 +283,7 @@ bool eth_account_set(eth_address& address, const ethaccount& account) {
     return true;
 }
 
-int64_t eth_account_get_balance(eth_address& address) {
+eth_uint256 eth_account_get_balance(eth_address& address) {
     uint64_t code = current_receiver().value;
     uint64_t scope = code;
 
@@ -295,12 +295,14 @@ int64_t eth_account_get_balance(eth_address& address) {
     auto idx_sec = mytable.get_index<"byaddress"_n>();
 
     auto itr = idx_sec.find(_address);
-    check(itr != idx_sec.end(), "get_balance:address does not created!");
-
-    return itr->balance.amount;
+//    check(itr != idx_sec.end(), "get_balance:address does not created!");
+    if (itr != idx_sec.end()) {
+        return *(eth_uint256*)&itr->balance;
+    }
+    return {};
 }
 
-bool eth_account_set_balance(eth_address& address, int64_t amount) {
+bool eth_account_set_balance(eth_address& address, eth_uint256& amount) {
     uint64_t code = current_receiver().value;
     uint64_t scope = code;
 
@@ -317,7 +319,7 @@ bool eth_account_set_balance(eth_address& address, int64_t amount) {
     check(itr != idx_sec.end(), "set_balance:address does not created");
     auto itr2 = mytable.find(itr->index);
     mytable.modify( itr2, name(payer), [&]( auto& row ) {
-        row.balance.amount = amount;
+        memcpy(row.balance.data(), amount.bytes, 32);
     });
     return true;
 }
@@ -525,4 +527,38 @@ bool eth_account_clear_value(eth_address& address, key256& key) {
     auto itr2 = mytable.find(itr->index);
     mytable.erase(itr2);
     return true;
+}
+
+void eth_account_clear_all() {
+    uint64_t code = current_receiver().value;
+    uint64_t scope = code;
+
+    ethaccount_table mytable(name(code), scope);
+
+    while(true) {
+        auto itr = mytable.upper_bound(0);
+        if (itr == mytable.end()) {
+            break;
+        }
+
+        account_state_table statetable(name(code), itr->creator);
+        while(true) {
+            auto itr = statetable.upper_bound(0);
+            if (itr == statetable.end()) {
+                break;
+            }
+            statetable.erase(itr);
+        }
+
+        ethcode_table codetable(name(code), itr->creator);
+        while(true) {
+            auto itr = codetable.upper_bound(0);
+            if (itr == codetable.end()) {
+                break;
+            }
+            codetable.erase(itr);
+        }
+
+        mytable.erase(itr);
+    }
 }

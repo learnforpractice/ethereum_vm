@@ -6,6 +6,7 @@
 #include <eosio/singleton.hpp>
 #include <eosio/fixed_bytes.hpp>
 #include "eth_account.hpp"
+#include "table_struct.hpp"
 
 using namespace eosio;
 using namespace std;
@@ -136,7 +137,23 @@ extern "C" {
                 return;
             }
 #endif
-            if (action == "create"_n.value) {
+            if (action == "clearenv"_n.value) {
+                eth_account_clear_all();
+            } else if (action == "setaddrinfo"_n.value) {
+                auto info = unpack_action_data<address_info>();
+                eosio::check(info.address.size() == 20, "bad address size!!");
+                eth_address &addr = *(eth_address*)info.address.data();
+                eth_account_create(addr, code);
+                eth_account_set_nonce(addr, info.nonce);
+                // printhex(info.balance.data(), info.balance.size());print("\n");
+                eosio::check(info.balance.size()==32, "bad balance value");
+                eth_account_set_balance(addr, *(eth_uint256*)info.balance.data());
+                eth_account_set_code(addr, info.code);
+        // vector<uint8_t>         address;
+        // uint64_t                nonce;
+        // uint64_t                balance;
+        // vector<uint8_t>         code;
+            } else if (action == "create"_n.value) {
                 eth_address address;
                 auto v = unpack_action_data<create>();
                 require_auth(v.account);
@@ -167,7 +184,7 @@ extern "C" {
                 eth_address address;
                 int64_t nonce;
                 int64_t ram_quota;
-                int64_t amount;
+                eth_uint256 amount;
                 
                 auto v = unpack_action_data<vector<char>>();
                 check(v.size() == 20, "bad address");
@@ -179,7 +196,7 @@ extern "C" {
                 
                 addrinfo info;
                 info.nonce = nonce;
-                info.balance.amount = amount;
+                info.balance.amount = *(int64_t*)&amount;
                 info.balance.symbol = symbol(ETH_ASSET_SYMBOL, 4);
                 auto packed_info = eosio::pack<addrinfo>(info);
                 printhex(packed_info.data(), packed_info.size());
@@ -193,11 +210,19 @@ extern "C" {
                 check(ret, "eth address not found!");
 {
                 asset a(0, symbol(ETH_ASSET_SYMBOL, 4));
-                a.amount = eth_account_get_balance(address);
-                eosio::print(a.symbol, v.amount.symbol);
+                eth_uint256 _balance = eth_account_get_balance(address);
+                uint128_t& balance = *(uint128_t*)&_balance;
+                check(balance <= (uint128_t)max_amount, "balance overflow!");
+
+                a.amount = (int64_t)balance;
+//                eosio::print(a.symbol, v.amount.symbol);
                 check(a.amount >= v.amount.amount, "balance overdraw!");
                 a -= v.amount;
-                eth_account_set_balance(address, a.amount);
+
+                eth_uint256 amount{};
+                memcpy(amount.bytes, &a.amount, sizeof(a.amount));
+
+                eth_account_set_balance(address, amount);
 }
                 struct action a;
                 a.account = "eosio.token"_n;
@@ -227,12 +252,20 @@ extern "C" {
                 if (t.to == _self && t.quantity.symbol == symbol(MAIN_TOKEN_NAME, 4) && t.memo == "deposit") {
                     eth_address address;
                     bool ret = eth_account_find_address_by_binded_creator(t.from.value, address);
-                    check(ret, "eth address not bind to an EOS account!!");
+                    check(ret, "eth address not bind to an EOS account!");
                     asset a(0, symbol(MAIN_TOKEN_NAME, 4));
-                    a.amount = eth_account_get_balance(address);
+
+                    check(t.quantity.amount > 0, "bad transfer value!");
+                    eth_uint256 _balance = eth_account_get_balance(address);
+                    uint128_t& balance = *(uint128_t*)&_balance;
+                    check(balance <= (uint128_t)max_amount, "balance overflow!");
+                    a.amount = (int64_t)balance;
                     // eosio::print("+++++eth amount:", a.amount);
                     a += t.quantity;
-                    eth_account_set_balance(address, a.amount);
+
+                    eth_uint256 amount{};
+                    memcpy(amount.bytes, &a.amount, sizeof(a.amount));
+                    eth_account_set_balance(address, amount);
                 }
             }
         }

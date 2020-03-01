@@ -19,7 +19,7 @@ struct [[eosio::table]] evm_storage {
 struct [[eosio::table]] address_info {
     vector<uint8_t>         address;
     uint64_t                nonce;
-    uint64_t                balance;
+    vector<uint8_t>         balance;
     vector<uint8_t>         code;
 
     EOSLIB_SERIALIZE( address_info, (address)(nonce)(balance)(code) )
@@ -79,7 +79,13 @@ extern "C" {
     void apply(uint64_t receiver, uint64_t first_receiver, uint64_t action) {
         if (action == "setaddrinfo"_n.value) {
             auto info = unpack_action_data<address_info>();
-            eth_account_create(*(eth_address*)info.address.data(), first_receiver);
+            eosio::check(info.address.size() == 20, "bad address size!!");
+            eth_address &addr = *(eth_address*)info.address.data();
+            eth_account_create(addr, first_receiver);
+            eth_account_set_nonce(addr, info.nonce);
+            eth_account_set_balance(addr, *(eth_uint256*)&info.balance);
+            eth_account_set_code(addr, info.code);
+
         // vector<uint8_t>         address;
         // uint64_t                nonce;
         // uint64_t                balance;
@@ -87,6 +93,8 @@ extern "C" {
         }  else if (action == "raw"_n.value) {
             auto a = unpack_action_data<raw>();
             evm_execute(a.trx.data(), a.trx.size(), a.sender.data(), a.sender.size());
+        } else if (action == "clearenv"_n.value) {
+            eth_account_clear_all();
         }
     }
 }

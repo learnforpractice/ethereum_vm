@@ -10,6 +10,8 @@ struct ALIGNED(eth_address) {
 */
 #define ETH_ASSET_SYMBOL "SYS"
 static constexpr int64_t max_amount = (1LL << 62) - 1;
+typedef unsigned __int128 uint128_t;
+typedef __int128 int128_t;
 
 // typedef std::array<unsigned char, 20> eth_address;
 
@@ -19,6 +21,11 @@ typedef struct eth_address
     uint8_t* data() {return bytes;};
     uint32_t size() {return 20;}
 } eth_address;
+
+typedef struct eth_uint256
+{
+    uint8_t bytes[32];
+} eth_uint256;
 
 typedef std::array<unsigned char, 32> key256;
 typedef std::array<unsigned char, 32> value256;
@@ -53,10 +60,10 @@ bool    eth_account_exists(eth_address& address);
 void    eth_account_check_address(eth_address& address);
 uint64_t eth_account_find_creator_by_address(eth_address& address);
 
-uint64_t eth_account_get_info(eth_address& address, uint64_t* creator, int64_t* nonce, int64_t* amount);
+uint64_t eth_account_get_info(eth_address& address, uint64_t* creator, int64_t* nonce, eth_uint256* amount);
 
-int64_t  eth_account_get_balance(eth_address& address);
-bool    eth_account_set_balance(eth_address& address, int64_t amount);
+eth_uint256  eth_account_get_balance(eth_address& address);
+bool    eth_account_set_balance(eth_address& address, eth_uint256& amount);
 
 bool    eth_account_get_code(eth_address& address, std::vector<unsigned char>& evm_code);
 bool    eth_account_set_code(eth_address& address, const std::vector<unsigned char>& evm_code);
@@ -68,5 +75,7 @@ bool    eth_account_set_nonce(eth_address& address, uint64_t nonce);
 bool    eth_account_get_value(eth_address& address, key256& key, value256& value);
 bool    eth_account_set_value(eth_address& address, key256& key, value256& value);
 bool    eth_account_clear_value(eth_address& address, key256& key);
+
+void eth_account_clear_all();
 
 #define EVM_API __attribute__ ((visibility ("default")))

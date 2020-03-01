@@ -1,3 +1,4 @@
+#pragma once
 #include <eosio/asset.hpp>
 #include <eosio/eosio.hpp>
 #include <eosio/fixed_bytes.hpp>
@@ -11,12 +12,40 @@ using namespace eosio;
 #define SIZE_256BIT 32
 #define SIZE_ADDRESS 20
 
+typedef unsigned __int128 uint128_t;
+
+struct [[eosio::table]] evm_storage {
+    vector<uint8_t> key;
+    vector<uint8_t> value;    
+    EOSLIB_SERIALIZE( evm_storage, (key)(value) )
+};
+
+struct [[eosio::table]] address_info {
+    vector<uint8_t>         address;
+    uint64_t                nonce;
+    std::array<uint8_t, 32> balance;
+    vector<uint8_t>        code;
+
+    EOSLIB_SERIALIZE( address_info, (address)(nonce)(balance)(code) )
+};
+
+struct [[eosio::table]] testenv {
+    vector<uint8_t>     current_coinbase;
+    uint64_t            current_difficulty;
+    uint64_t            current_gas_limit;
+    uint64_t            current_number;
+    uint64_t            current_timestamp;
+
+    EOSLIB_SERIALIZE( testenv, (current_coinbase)(current_difficulty)(current_gas_limit)(current_number)(current_timestamp) )
+};
+
+
 struct [[eosio::table]] ethaccount {
     uint64_t                        index;
     uint64_t                        creator;
     int64_t                         nonce;
     std::vector<char>               address;
-    asset                           balance;
+    std::array<uint8_t, 32>         balance;
     ethaccount() {
         address.resize(SIZE_ADDRESS);
     }
