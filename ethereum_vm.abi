@@ -3,6 +3,14 @@
    "types": [],
   "structs": [
     {
+      "name": "testexec",
+      "base": "",
+      "fields": [
+        {"name":"data",       "type":"bytes"},
+        {"name":"counter",   "type":"uint64"}
+       ]
+    },
+    {
       "name": "testinfo",
       "base": "",
       "fields": [
@@ -10,6 +18,7 @@
         {"name":"nonce",   "type":"uint64"},
         {"name":"balance", "type":"checksum256"},
         {"name":"code",    "type":"bytes"},
+        {"name":"counter", "type":"uint64"},
        ]
     },
     {
@@ -108,6 +117,11 @@
     }
   ],
   "actions": [
+    {
+      "name": "testexec",
+      "type": "testexec",
+      "ricardian_contract": ""
+    },
     {
       "name": "setaddrinfo",
       "type": "testinfo",

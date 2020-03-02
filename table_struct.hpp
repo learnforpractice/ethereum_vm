@@ -14,13 +14,13 @@ using namespace eosio;
 
 typedef unsigned __int128 uint128_t;
 
-struct [[eosio::table]] evm_storage {
+struct evm_storage {
     vector<uint8_t> key;
     vector<uint8_t> value;    
     EOSLIB_SERIALIZE( evm_storage, (key)(value) )
 };
 
-struct [[eosio::table]] address_info {
+struct address_info {
     eth_address             address;
     uint64_t                nonce;
     std::array<uint8_t, 32> balance;
@@ -29,7 +29,7 @@ struct [[eosio::table]] address_info {
     EOSLIB_SERIALIZE( address_info, (address)(nonce)(balance)(code) )
 };
 
-struct [[eosio::table]] testenv {
+struct testenv {
     vector<uint8_t>     current_coinbase;
     uint64_t            current_difficulty;
     uint64_t            current_gas_limit;

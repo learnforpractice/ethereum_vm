@@ -8,6 +8,9 @@ struct ALIGNED(eth_address) {
     unsigned char data[20];
 };
 */
+
+using namespace std;
+
 #define ETH_ASSET_SYMBOL "SYS"
 static constexpr int64_t max_amount = (1LL << 62) - 1;
 typedef unsigned __int128 uint128_t;

@@ -65,7 +65,7 @@ void reset_env() {
 
 extern "C" {
     __attribute__((eosio_wasm_import))
-    int evm_execute(const char *raw_trx, size_t raw_trx_size, const char *sender_address, size_t sender_address_size);
+    int evm_execute(const char *raw_trx, uint32_t raw_trx_size, const char *sender_address, uint32_t sender_address_size);
 
     void load_secp256k1_ecmult_static_context() {
         eosio::check(false, "not implemented!");

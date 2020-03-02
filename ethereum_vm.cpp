@@ -7,6 +7,7 @@
 #include <eosio/fixed_bytes.hpp>
 #include "eth_account.hpp"
 #include "table_struct.hpp"
+#include "evm_test.hpp"
 
 using namespace eosio;
 using namespace std;
@@ -19,9 +20,9 @@ extern "C"
 
 #if defined USE_INTRINSIC_EVM_EXECUTE
     __attribute__((eosio_wasm_import))
-    int evm_execute(const char *raw_trx, size_t raw_trx_size, const char *sender_address, size_t sender_address_size);
+    int evm_execute(const char *raw_trx, uint32_t raw_trx_size, const char *sender_address, uint32_t sender_address_size);
 #else
-    EVM_API int evm_execute(const char *raw_trx, size_t raw_trx_size, const char *sender_address, size_t sender_address_size);
+    EVM_API int evm_execute(const char *raw_trx, uint32_t raw_trx_size, const char *sender_address, uint32_t sender_address_size);
 #endif
 }
 
@@ -166,15 +167,6 @@ extern "C" {
                 bool ret = eth_account_create(v.address, v.account.value);
             } else if (action == "raw"_n.value) {
                 auto a = unpack_action_data<raw>();
-
-//                uint64_t creator;
-//                eth_address address;
-//                check(a.sender.size() == 20, "bad eth address");
-//                memcpy(address.data(), a.sender.data(), a.sender.size());
-//                creator = eth_account_find_creator_by_address(address);
-//                check(creator, "address not bind to an EOS account!");
-//                require_auth(name(creator));
-
                 evm_execute(a.trx.data(), a.trx.size(), a.sender.data(), a.sender.size());
             } else if (action == "getaddrinfo"_n.value) {
                 eth_address address;
