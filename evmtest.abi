@@ -3,13 +3,23 @@
    "types": [],
   "structs": [
     {
-      "name": "addrinfo",
+      "name": "testexec",
       "base": "",
       "fields": [
-        {"name":"address", "type":"bytes"},
+        {"name":"data",       "type":"bytes"},
+        {"name":"counter",   "type":"uint64"}
+       ]
+    },
+    {
+      "name": "testinfo",
+      "base": "",
+      "fields": [
+        {"name":"address", "type":"checksum160"},
         {"name":"nonce",   "type":"uint64"},
         {"name":"balance", "type":"checksum256"},
         {"name":"code",    "type":"bytes"},
+        {"name":"storage", "type":"checksum256[]"},
+        {"name":"counter", "type":"uint64"},
        ]
     },
     {
@@ -19,11 +29,10 @@
         {"name":"index", "type":"uint64"},
         {"name":"creator", "type":"name"},
         {"name":"nonce", "type":"uint64"},
-        {"name":"address", "type":"bytes"},
+        {"name":"address", "type":"checksum160"},
         {"name":"balance", "type":"checksum256"},
        ]
-    },
-    {
+    },{
       "name": "accountstate",
       "base": "",
       "fields": [
@@ -36,7 +45,7 @@
       "base": "",
       "fields": [
         {"name":"index",   "type":"uint64"},
-        {"name":"address", "type":"bytes"},
+        {"name":"address", "type":"checksum160"},
         {"name":"code",    "type":"bytes"}
        ]
     },{
@@ -57,7 +66,7 @@
       "base": "",
       "fields": [
         {"name":"creator",   "type":"name"},
-        {"name":"address",   "type":"bytes"}
+        {"name":"address",   "type":"checksum160"}
        ]
     },{
       "name": "create",
@@ -71,7 +80,7 @@
       "base": "",
       "fields": [
         {"name":"account", "type":"name"},
-        {"name":"address", "type":"bytes"}
+        {"name":"address", "type":"checksum160"}
        ]
     },{
       "name": "ethraw",
@@ -79,6 +88,19 @@
       "fields": [
         {"name":"trx", "type":"bytes"},
         {"name":"sender", "type":"bytes"}
+       ]
+    },{
+      "name": "addrinfo",
+      "base": "",
+      "fields": [
+        {"name":"nonce", "type":"uint64"},
+        {"name":"balance", "type":"checksum256"},
+       ]
+    },{
+      "name": "getaddrinfo",
+      "base": "",
+      "fields": [
+        {"name":"address", "type":"checksum160"}
        ]
     },{
       "name": "withdraw",
@@ -97,8 +119,13 @@
   ],
   "actions": [
     {
+      "name": "testexec",
+      "type": "testexec",
+      "ricardian_contract": ""
+    },
+    {
       "name": "setaddrinfo",
-      "type": "addrinfo",
+      "type": "testinfo",
       "ricardian_contract": ""
     },
     {
@@ -113,6 +140,14 @@
     },{
       "name": "raw",
       "type": "ethraw",
+      "ricardian_contract": ""
+    },{
+      "name": "getaddrinfo",
+      "type": "getaddrinfo",
+      "ricardian_contract": ""
+    },{
+      "name": "addrinfo",
+      "type": "addrinfo",
       "ricardian_contract": ""
     },{
       "name": "withdraw",

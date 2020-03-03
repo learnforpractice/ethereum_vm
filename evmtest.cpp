@@ -6,34 +6,11 @@
 #include <eosio/singleton.hpp>
 #include <eosio/fixed_bytes.hpp>
 #include "eth_account.hpp"
+#include "table_struct.hpp"
 
 using namespace std;
 using namespace eosio;
 
-struct [[eosio::table]] evm_storage {
-    vector<uint8_t> key;
-    vector<uint8_t> value;    
-    EOSLIB_SERIALIZE( evm_storage, (key)(value) )
-};
-
-struct [[eosio::table]] address_info {
-    vector<uint8_t>         address;
-    uint64_t                nonce;
-    vector<uint8_t>         balance;
-    vector<uint8_t>         code;
-
-    EOSLIB_SERIALIZE( address_info, (address)(nonce)(balance)(code) )
-};
-
-struct [[eosio::table]] testenv {
-    vector<uint8_t>     current_coinbase;
-    uint64_t            current_difficulty;
-    uint64_t            current_gas_limit;
-    uint64_t            current_number;
-    uint64_t            current_timestamp;
-
-    EOSLIB_SERIALIZE( testenv, (current_coinbase)(current_difficulty)(current_gas_limit)(current_number)(current_timestamp) )
-};
 
 struct raw {
     vector<char> trx;
@@ -64,8 +41,7 @@ void reset_env() {
 }
 
 extern "C" {
-    __attribute__((eosio_wasm_import))
-    int evm_execute(const char *raw_trx, uint32_t raw_trx_size, const char *sender_address, uint32_t sender_address_size);
+    void evm_execute_test(const uint8_t* tests, uint32_t _size);
 
     void load_secp256k1_ecmult_static_context() {
         eosio::check(false, "not implemented!");
@@ -76,23 +52,26 @@ extern "C" {
         return nullptr;
     }
 
-    void apply(uint64_t receiver, uint64_t first_receiver, uint64_t action) {
-        if (action == "setaddrinfo"_n.value) {
+    void apply(uint64_t receiver, uint64_t code, uint64_t action) {
+        if (action == "clearenv"_n.value) {
+            eth_account_clear_all();
+        } else if (action == "setaddrinfo"_n.value) {
             auto info = unpack_action_data<address_info>();
-            eosio::check(info.address.size() == 20, "bad address size!!");
-            eth_address &addr = *(eth_address*)info.address.data();
-            eth_account_create(addr, first_receiver);
-            eth_account_set_nonce(addr, info.nonce);
-            eth_account_set_balance(addr, *(eth_uint256*)&info.balance);
-            eth_account_set_code(addr, info.code);
-
-        // vector<uint8_t>         address;
-        // uint64_t                nonce;
-        // uint64_t                balance;
-        // vector<uint8_t>         code;
-        }  else if (action == "raw"_n.value) {
+            eth_account_create(info.address, code);
+            eth_account_set_nonce(info.address, info.nonce);
+            // printhex(info.balance.data(), info.balance.size());print("\n");
+            eosio::check(info.balance.size()==32, "bad balance value!!");
+            eth_account_set_balance(info.address, *(eth_uint256*)info.balance.data());
+            eth_account_set_code(info.address, info.code);
+            for (uint32_t i=0;i<info.storage.size();i+=2) {
+                auto& key = info.storage[i*2];
+                auto& value = info.storage[i*2+1];
+                // printhex(key.data(), key.size());print(":");printhex(value.data(), value.size());
+                eth_account_set_value(info.address, key, value);
+            }
+        } else if (action == "raw"_n.value) {
             auto a = unpack_action_data<raw>();
-            evm_execute(a.trx.data(), a.trx.size(), a.sender.data(), a.sender.size());
+            evm_execute_test((uint8_t*)a.trx.data(), a.trx.size());
         } else if (action == "clearenv"_n.value) {
             eth_account_clear_all();
         }
