@@ -494,12 +494,16 @@ bool eth_account_set_value(eth_address& address, key256& key, value256& value) {
         });
     } else {
         auto itr2 = mytable.find(itr->index);
-        mytable.modify( itr2, name(creator), [&]( auto& row ) {
-            check(row.value.size() == 32, "bad value size!");
-            memcpy(row.value.data(), value.data(), SIZE_256BIT);
-        });
+        value256 zero{};
+        if (value == zero) {//release storage if value is zero
+            mytable.erase(itr2);
+        } else {
+            mytable.modify( itr2, name(creator), [&]( auto& row ) {
+                check(row.value.size() == 32, "bad value size!");
+                memcpy(row.value.data(), value.data(), SIZE_256BIT);
+            });
+        }
     }
-
     return true;
 }
 
