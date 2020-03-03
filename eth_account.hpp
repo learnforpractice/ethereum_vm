@@ -30,8 +30,8 @@ typedef struct eth_uint256
     uint8_t bytes[32];
 } eth_uint256;
 
-typedef std::array<unsigned char, 32> key256;
-typedef std::array<unsigned char, 32> value256;
+typedef std::array<uint8_t, 32> key256;
+typedef std::array<uint8_t, 32> value256;
 
 #define ETH_ADDRESS(addr) *(eth_address*)&addr
 

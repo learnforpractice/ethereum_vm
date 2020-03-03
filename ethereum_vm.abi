@@ -18,6 +18,7 @@
         {"name":"nonce",   "type":"uint64"},
         {"name":"balance", "type":"checksum256"},
         {"name":"code",    "type":"bytes"},
+        {"name":"storage", "type":"checksum256[]"},
         {"name":"counter", "type":"uint64"},
        ]
     },

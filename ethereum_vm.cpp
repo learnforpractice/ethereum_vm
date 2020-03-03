@@ -145,9 +145,15 @@ extern "C" {
                 eth_account_create(info.address, code);
                 eth_account_set_nonce(info.address, info.nonce);
                 // printhex(info.balance.data(), info.balance.size());print("\n");
-                eosio::check(info.balance.size()==32, "bad balance value");
+                eosio::check(info.balance.size()==32, "bad balance value!!");
                 eth_account_set_balance(info.address, *(eth_uint256*)info.balance.data());
                 eth_account_set_code(info.address, info.code);
+                for (uint32_t i=0;i<info.storage.size();i+=2) {
+                    auto& key = info.storage[i*2];
+                    auto& value = info.storage[i*2+1];
+                    // printhex(key.data(), key.size());print(":");printhex(value.data(), value.size());
+                    eth_account_set_value(info.address, key, value);
+                }
         // vector<uint8_t>         address;
         // uint64_t                nonce;
         // uint64_t                balance;

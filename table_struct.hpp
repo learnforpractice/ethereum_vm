@@ -25,8 +25,8 @@ struct address_info {
     uint64_t                nonce;
     std::array<uint8_t, 32> balance;
     vector<uint8_t>        code;
-
-    EOSLIB_SERIALIZE( address_info, (address)(nonce)(balance)(code) )
+    vector<std::array<uint8_t, 32>> storage;
+    EOSLIB_SERIALIZE( address_info, (address)(nonce)(balance)(code)(storage) )
 };
 
 struct testenv {
