@@ -35,13 +35,10 @@ struct raw {
 }
 */
 
-
-void reset_env() {
-
-}
-
 extern "C" {
     void evm_execute_test(const uint8_t* tests, uint32_t _size);
+    __attribute__((eosio_wasm_import))
+    int evm_execute(const char *raw_trx, uint32_t raw_trx_size, const char *sender_address, uint32_t sender_address_size);
 
     void load_secp256k1_ecmult_static_context() {
         eosio::check(false, "not implemented!");
@@ -71,7 +68,11 @@ extern "C" {
             }
         } else if (action == "raw"_n.value) {
             auto a = unpack_action_data<raw>();
-            evm_execute_test((uint8_t*)a.trx.data(), a.trx.size());
+            #ifdef USE_INTRINSIC_EVM_EXECUTE
+                evm_execute(a.trx.data(), a.trx.size(), a.sender.data(), a.sender.size());
+            #else
+                evm_execute_test((uint8_t*)a.trx.data(), a.trx.size());
+            #endif
         } else if (action == "clearenv"_n.value) {
             eth_account_clear_all();
         }
