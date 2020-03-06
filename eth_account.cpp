@@ -558,7 +558,16 @@ void eth_account_clear_all() {
             }
             codetable.erase(itr);
         }
-
         mytable.erase(itr);
+    }
+
+
+    addressmap_table address_map_table(name(code), scope);
+    while(true) {
+        auto itr = address_map_table.upper_bound(0);
+        if (itr == address_map_table.end()) {
+            break;
+        }
+        address_map_table.erase(itr);
     }
 }
