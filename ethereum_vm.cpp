@@ -196,7 +196,7 @@ extern "C" {
                 eth_uint256 amount{};
                 memcpy(amount.bytes, &a.amount, sizeof(a.amount));
 
-                eth_account_set_balance(address, amount);
+                eth_account_set_balance(address, amount, same_payer.value);
 }
                 struct action a;
                 a.account = "eosio.token"_n;
@@ -239,7 +239,7 @@ extern "C" {
 
                     eth_uint256 amount{};
                     memcpy(amount.bytes, &a.amount, sizeof(a.amount));
-                    eth_account_set_balance(address, amount);
+                    eth_account_set_balance(address, amount, same_payer.value);
                 }
             }
         }

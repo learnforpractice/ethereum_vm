@@ -66,7 +66,7 @@ uint64_t eth_account_find_creator_by_address(eth_address& address);
 uint64_t eth_account_get_info(eth_address& address, uint64_t* creator, int64_t* nonce, eth_uint256* amount);
 
 eth_uint256  eth_account_get_balance(eth_address& address);
-bool    eth_account_set_balance(eth_address& address, eth_uint256& amount);
+bool    eth_account_set_balance(eth_address& address, eth_uint256& amount, uint64_t payer = 0);
 
 bool    eth_account_get_code(eth_address& address, std::vector<unsigned char>& evm_code);
 bool    eth_account_set_code(eth_address& address, const std::vector<unsigned char>& evm_code);

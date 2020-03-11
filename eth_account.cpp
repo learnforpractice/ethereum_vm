@@ -299,12 +299,9 @@ eth_uint256 eth_account_get_balance(eth_address& address) {
     return {};
 }
 
-bool eth_account_set_balance(eth_address& address, eth_uint256& amount) {
+bool eth_account_set_balance(eth_address& address, eth_uint256& amount, uint64_t payer) {
     uint64_t code = current_receiver().value;
     uint64_t scope = code;
-
-    uint64_t payer = current_receiver().value;
-
     checksum256 _address;
     memset(_address.data(), 0, sizeof(checksum256));
     memcpy(_address.data(), address.data(), SIZE_ADDRESS);
